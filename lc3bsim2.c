@@ -418,10 +418,12 @@ void process_instruction(){
 	int currentPC = CURRENT_LATCHES.PC;
 	int lowByte = MEMORY[currentPC >> 1][0];
 	int highByte = MEMORY[currentPC >> 1][1];
-	/*if elses
-	right shift lowbyte to get opcode
-	sort into correct opcode
-	0x4000 CD //0x4001 AB*/
+	/*
+         * if elses 
+         * right shift lowbyte to get opcode
+         * sort into correct opcode
+         * 0x4000 CD //0x4001 AB
+         */
 
 	/*ADD*/
 	if (lowByte >> 4 == 1)
