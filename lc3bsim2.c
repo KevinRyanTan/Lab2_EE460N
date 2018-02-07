@@ -432,16 +432,24 @@ void process_instruction() {
 	{
 		DR = (highByte >> 1) & 0x7;
 		SR1 = (highByte & 0x1 << 2) + ((lowByte >> 6) & 0x3);
-		/*imm5*/
-		if (lowByte & 0x20 == 1) { 
-			NEXT_LATCHES.REGS[DR] = SR1 + (lowByte & 0x1F); 
+
+		int i = 0;
+		for (i = 0; i < LC_3b_REGS; i++)
+		{
+			if (DR == i) {
+				/*imm5*/
+				if (lowByte & 0x20 == 1) {
+					NEXT_LATCHES.REGS[DR] = SR1 + (lowByte & 0x1F);
+				}
+				/*2 SR*/
+				else {
+					NEXT_LATCHES.REGS[DR] = SR1 + (lowByte & 0x7);
+				}
+			}
+			else {
+				NEXT_LATCHES.REGS[i] = CURRENT_LATCHES.REGS[i];
+			}
 		}
-		/*2 SR*/
-		else {
-			NEXT_LATCHES.REGS[DR] = SR1 + (lowByte & 0x7);
-		}
-		/* im not sure if we have to set all the next registers that havent been touched to current registers
-		 i think we do, but not positive*/
 		NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 		NEXT_LATCHES.N = CURRENT_LATCHES.N;
 		NEXT_LATCHES.Z = CURRENT_LATCHES.Z;
