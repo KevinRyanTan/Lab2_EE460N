@@ -426,7 +426,7 @@ void process_instruction() {
 	int DR = 0;
 	int SR1 = 0;
 	int SR2 = 0;
-        int CC_SETTER = 0;
+  int CC_SETTER = 0;
 
 	/*ADD*/
 	if (highByte >> 4 == 1)
@@ -434,42 +434,19 @@ void process_instruction() {
 		DR = (highByte >> 1) & 0x7;
 		SR1 = (highByte & 0x1 << 2) + ((lowByte >> 6) & 0x3);
                 
-                /*all the latches that we don't change will be the same*/
-                NEXT_LATCHES = CURRENT_LATCHES;
-                /*imm5*/
-                if (lowByte & 0x20 == 1) {
+    /*all the latches that we don't change will be the same*/
+    NEXT_LATCHES = CURRENT_LATCHES;
+    /*imm5*/
+    if (lowByte & 0x20 == 1) {
 			NEXT_LATCHES.REGS[DR] = CC_SETTER = SR1 + (lowByte & 0x1F);
 		}
 		/*2 SR*/
-                else {
-                        SR2 = CURRENT_LATCHES.REGS[lowByte & 0x7];
-                        NEXT_LATCHES.REGS[DR] = CC_SETTER = SR1 + SR2;
-                }
-                setCCs(CC_SETTER);
-                NEXT_LATCHES.PC = NEXT_LATCHES.PC + 2;
-                
-                /*you don't change condition codes and you copy each register one by one*/
-                int i = 0;
-		for (i = 0; i < LC_3b_REGS; i++)
-		{
-			if (DR == i) {
-				/*imm5*/
-				if (lowByte & 0x20 == 1) {
-					NEXT_LATCHES.REGS[DR] = SR1 + (lowByte & 0x1F);
-				}
-				/*2 SR*/
-				else {
-					NEXT_LATCHES.REGS[DR] = SR1 + (lowByte & 0x7);
-				}
-			}
-			else {
-				NEXT_LATCHES.REGS[i] = CURRENT_LATCHES.REGS[i];
-			}
-		}
-		NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
-		NEXT_LATCHES.N = CURRENT_LATCHES.N;
-		NEXT_LATCHES.Z = CURRENT_LATCHES.Z;
-		NEXT_LATCHES.P = CURRENT_LATCHES.P;
+    else {
+      SR2 = CURRENT_LATCHES.REGS[lowByte & 0x7];
+      NEXT_LATCHES.REGS[DR] = CC_SETTER = SR1 + SR2;
+    }
+    setCCs(CC_SETTER);
+    NEXT_LATCHES.PC = NEXT_LATCHES.PC + 2;
 	}
 	/*AND*/
 	if (highByte >> 4 == 5)
