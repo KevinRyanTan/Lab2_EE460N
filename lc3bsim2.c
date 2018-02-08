@@ -509,7 +509,7 @@ void process_instruction() {
             }
             NEXT_LATCHES.REGS[7] = Low16bits(CURRENT_LATCHES.PC + 2);
 	}
-	/*********************************LDB**************************************/
+	/*********************************LDB*****************************************/
 	if (highByte >> 4 == 2)
 	{
             DR = (highByte >> 1) & 0x7;
@@ -522,13 +522,23 @@ void process_instruction() {
             int hilo = address & 1;
             CC_SETTER = 0xFF & (MEMORY[waddr][hilo]);
             if(CC_SETTER & 0x80) CC_SETTER = signExtend(CC_SETTER, 8);
-            NEXT_LATCHES.REGS[DR] = CC_SETTER;
+            NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
             setCCs(CC_SETTER);   
 	}
-	/*LDW*/
+	/**********************************LDW****************************************/
 	if (highByte >> 4 == 6)
 	{
-
+            DR = (highByte >> 1) & 0x7;
+            SR1 = ((highByte & 0x1) << 2) + ((lowByte >> 6) 0x3);
+            operand1 = CURRENT_LATCHES.REGS[SR1];
+            operand2 = lowByte & 0x3F;
+            if(operand2 & 0x20) operand2 = signExtend(operand2, 6);
+            operand2 = operand2 << 1;
+            int address = operand1 + operand2;
+            CC_SETTER = ((MEMORY[address >> 1][1] & 0xFF) << 8) + (MEMORY[address >> 1][0] & 0xFF);
+            if(CC_SETTER & 0x8000) CC_SETTER = signExtend(CC_SETTER, 16)
+            NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
+            setCCs(CC_SETTER); 
 	}
 	/*LEA*/
 	/*Should NOT  set condition codes*/
