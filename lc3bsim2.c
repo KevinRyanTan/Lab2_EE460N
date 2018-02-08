@@ -594,7 +594,7 @@ void setCCs(int CC_SETTER){
 
 int signExtend(int extend,int bit)
 {
-	int mask = 0xFFFF0000;
-	mask = mask >> (16-bit);	
-	return extend+mask;
+    int mask = 0xFFFF0000;
+    mask = mask >> (16-bit);	
+    return extend+mask;
 }
