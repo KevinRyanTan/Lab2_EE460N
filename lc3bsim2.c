@@ -436,13 +436,13 @@ void process_instruction() {
                 if (lowByte & 0x20) {
                         operand2 = (lowByte & 0x1F);
                         /*if immediate is negative, sign extend it, otherwise stays the same*/
-                        if (operand2 & 0x10) signExtend(operand2, 5);
+                        if (operand2 & 0x10) operand2 = signExtend(operand2, 5);
 		}
 		/*2 SR*/
                 else {
                         SR2 = lowByte & 0x07;
                         operand2 = CURRENT_LATCHES.REGS[SR2];
-                        if(operand2 & 0x8000) signExtend(operand2, 16);
+                        if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
     
                 }
                 CC_SETTER = operand1 + operand2;
@@ -457,19 +457,19 @@ void process_instruction() {
 		SR1 = (highByte & 0x1 << 2) + ((lowByte >> 6) & 0x3);
                 
                 operand1 = CURRENT_LATCHES.REGS[SR1];
-                if(operand1 & 0x8000) operand1 = signExtend(operand1, 16);
+                if(operand1 & 0x8000) operand1 = operand1 = signExtend(operand1, 16);
                
                 /*imm5*/
                 if (lowByte & 0x20) {
                         operand2 = (lowByte & 0x1F);
                         /*if immediate is negative, sign extend it, otherwise stays the same*/
-                        if (operand2 & 0x10) signExtend(operand2, 5);
+                        if (operand2 & 0x10) operand2 = signExtend(operand2, 5);
 		}
 		/*2 SR*/
                 else {
                         SR2 = lowByte & 0x07;
                         operand2 = CURRENT_LATCHES.REGS[SR2];
-                        if(operand2 & 0x8000) signExtend(operand2, 16);
+                        if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
                 }
                 CC_SETTER = operand1 & operand2;
                 setCCs(CC_SETTER);
@@ -482,7 +482,7 @@ void process_instruction() {
             NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.PC + 2);
             if((CURRENT_LATCHES.N == highByte >> 3 & 0x1) ||(CURRENT_LATCHES.N == highByte >> 2 & 0x1) || (CURRENT_LATCHES.N == highByte >> 1 & 0x1) ){
                 operand1 = ((highByte & 0x1)<< 9) + (lowByte & 0xFF);
-                if(operand1 & 0x100) signExtend(operand1, 9);
+                if(operand1 & 0x100) operand1 = signExtend(operand1, 9);
                 operand1 = operand1 << 1;
                 NEXT_LATCHES.PC = Low16bits(NEXT_LATCHES.PC + operand1);
             }
@@ -499,7 +499,7 @@ void process_instruction() {
 	{
             if(highByte & 0x08){
                 operand1 = ((highByte & 0x7) << 8) + (lowByte & 0xFF);
-                if(operand1 & 0x400) signExtend(operand1, 11);
+                if(operand1 & 0x400) operand1 = signExtend(operand1, 11);
                 operand1 = operand1 << 1;
                 NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES + 2 + operand1);
             }
@@ -509,10 +509,21 @@ void process_instruction() {
             }
             NEXT_LATCHES.REGS[7] = Low16bits(CURRENT_LATCHES.PC + 2);
 	}
-	/*LDB*/
+	/*********************************LDB**************************************/
 	if (highByte >> 4 == 2)
 	{
-
+            DR = (highByte >> 1) & 0x7;
+            SR1 = ((highByte & 0x1) << 2) + ((lowByte >> 6) 0x3);
+            operand1 = CURRENT_LATCHES.REGS[SR1];
+            operand2 = lowByte & 0x3F;
+            if(operand2 & 0x20) operand2 = signExtend(operand2, 6);
+            int address = operand1 + operand2;
+            int waddr = address >> 1;
+            int hilo = address & 1;
+            CC_SETTER = 0xFF & (MEMORY[waddr][hilo]);
+            if(CC_SETTER & 0x80) CC_SETTER = signExtend(CC_SETTER, 8);
+            NEXT_LATCHES.REGS[DR] = CC_SETTER;
+            setCCs(CC_SETTER);   
 	}
 	/*LDW*/
 	if (highByte >> 4 == 6)
