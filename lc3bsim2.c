@@ -546,7 +546,7 @@ void process_instruction() {
 	/*Should NOT  set condition codes*/
 	if (highByte >> 4 == 14)
 	{
-            DR = (highByte >> 1) 0x7;
+            DR = (highByte >> 1) & 0x7;
             operand1 = ((highByte & 0x1) << 8) + (lowByte & 0xFF);
             if(operand1 & 0x100) operand1 = signExtend(operand1, 9);
             NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.PC + 2 + operand1);
@@ -586,7 +586,8 @@ void process_instruction() {
 	}
 	/*********************************STW******************************************/
 	if (highByte >> 4 == 7)
-	{
+	{   
+            
 
 	}
 	/*TRAP*/
