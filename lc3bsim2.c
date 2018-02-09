@@ -542,36 +542,49 @@ void process_instruction() {
             setCCs(CC_SETTER); 
             NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 	}
-	/*LEA*/
+	/*********************************LEA*****************************************/
 	/*Should NOT  set condition codes*/
 	if (highByte >> 4 == 14)
 	{
+            DR = (highByte >> 1) 0x7;
+            operand1 = ((highByte & 0x1) << 8) + (lowByte & 0xFF);
+            if(operand1 & 0x100) operand1 = signExtend(operand1, 9);
+            NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.PC + 2 + operand1);
 
 	}
 	/*SHF*/
 	if (highByte >> 4 == 13)
 	{
             int flag = (lowByte >> 4) & 0x11;
-            int amt = lowByte & 0x0F;
+            operand1 = lowByte & 0x0F;
             if(flag == 0) {
-                    NEXT_LATCHES.REGS[DR] = CC_SETTER = CURRENT_LATCHES.REGS[SR1] << amt;
+                    NEXT_LATCHES.REGS[DR] = CC_SETTER = CURRENT_LATCHES.REGS[SR1] << operand1;
             }
             /*fix logical and arithmatic shift*/
             else if (flag == 1) {
-                    NEXT_LATCHES.REGS[DR] = CC_SETTER = (CURRENT_LATCHES.REGS[SR1] >> amt);
+                    NEXT_LATCHES.REGS[DR] = CC_SETTER = (CURRENT_LATCHES.REGS[SR1] >> operand1);
             }
             else {
-                    NEXT_LATCHES.REGS[DR] = CC_SETTER = CURRENT_LATCHES.REGS[SR1] >> amt;
+                    NEXT_LATCHES.REGS[DR] = CC_SETTER = CURRENT_LATCHES.REGS[SR1] >> operand1;
             }
             setCCs(CC_SETTER);
             NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 	}
-	/*STB*/
+	/********************************STB*******************************************/
 	if (highByte >> 4 == 3)
 	{
-
+            /*SR1 has info to store*/
+            SR1 = (highByte >> 1) & 0x7;
+            SR2 = ((highByte & 0x1) << 2) + ((lowByte >> 6) & 0x3); 
+            operand1 = CURRENT_LATCHES.REGS[SR2];
+            if(operand1 & 0x8000) operand1 = signExtend(operand1,16);
+            operand2 = lowByte & 0x3F;
+            if(operand2 & 0x20) operand2 = signExtend(operand2, 6);
+            int address = operand1 + operand2;
+            MEMORY[address >> 1][address & 0x1] = CURRENT_LATCHES.REGS[SR1] & 0xFF;
+            NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;            
 	}
-	/*STW*/
+	/*********************************STW******************************************/
 	if (highByte >> 4 == 7)
 	{
 
