@@ -556,19 +556,23 @@ void process_instruction() {
 	if (highByte >> 4 == 13)
 	{
             int flag = (lowByte >> 4) & 0x11;
-            operand1 = lowByte & 0x0F;
-            if(flag == 0) {
-                    NEXT_LATCHES.REGS[DR] = CC_SETTER = CURRENT_LATCHES.REGS[SR1] << operand1;
-            }
-            /*fix logical and arithmatic shift*/
-            else if (flag == 1) {
-                    NEXT_LATCHES.REGS[DR] = CC_SETTER = (CURRENT_LATCHES.REGS[SR1] >> operand1);
-            }
-            else {
-                    NEXT_LATCHES.REGS[DR] = CC_SETTER = CURRENT_LATCHES.REGS[SR1] >> operand1;
-            }
-            setCCs(CC_SETTER);
-            NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
+		operand1 = lowByte & 0x0F;
+		operand2 = CURRENT_LATCHES.REGS[SR1];
+		if (flag == 0) {
+			NEXT_LATCHES.REGS[DR] = CC_SETTER = operand2 << operand1;
+		}
+		/*logical*/
+		else if (flag == 1) {
+			NEXT_LATCHES.REGS[DR] = CC_SETTER = ((unsigned)operand2) >> operand1;
+		}
+		/*arithmetic*/
+		else {
+			if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
+			CC_SETTER = operand2 >> operand1;
+			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
+		}
+		setCCs(CC_SETTER);
+		NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 	}
 	/********************************STB*******************************************/
 	if (highByte >> 4 == 3)
