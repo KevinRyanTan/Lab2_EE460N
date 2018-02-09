@@ -587,8 +587,17 @@ void process_instruction() {
 	/*********************************STW******************************************/
 	if (highByte >> 4 == 7)
 	{   
-            
-
+            SR1 = (highByte >> 1) & 0x7;
+            SR2 = ((highByte & 0x1) << 2) + ((lowByte >> 6) & 0x3); 
+            operand1 = CURRENT_LATCHES.REGS[SR2];
+            if(operand1 & 0x8000) operand1 = signExtend(operand1,16);
+            operand2 = lowByte & 0x3F;
+            if(operand2 & 0x20) operand2 = signExtend(operand2, 6);
+            operand2 = operand2 >> 1;
+            int address = operand1 + operand2;
+            MEMORY[address >> 1][0] = CURRENT_LATCHES.REGS[SR1] & 0xFF;
+            MEMORY[address >> 1][1] = CURRENT_LATCHES.REGS[SR1] & 0xFF00 >> 8;
+            NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2; 
 	}
 	/*TRAP*/
 	if (highByte >> 4 == 15)
