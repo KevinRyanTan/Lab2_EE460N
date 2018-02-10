@@ -549,7 +549,8 @@ void process_instruction() {
             DR = (highByte >> 1) & 0x7;
             operand1 = ((highByte & 0x1) << 8) + (lowByte & 0xFF);
             if(operand1 & 0x100) operand1 = signExtend(operand1, 9);
-            NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.PC + 2 + operand1);
+            NEXT_LATCHES.REGS[DR] = Low16bits(CURRENT_LATCHES.PC + 2 + operand1);
+            NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.PC + 2);
 
 	}
 	/*SHF*/
@@ -604,7 +605,7 @@ void process_instruction() {
 	{
             /*r7 loaded with incremented pc*/	
             NEXT_LATCHES = CURRENT_LATCHES;	
-            NEXT_LATCHES.REGS[NEXT_LATCHES.PC + 2];
+            NEXT_LATCHES.REGS[1];
             NEXT_LATCHES.PC = (lowByte & 0x0000FFFF) << 1;
 	}
 	/*XOR*/
