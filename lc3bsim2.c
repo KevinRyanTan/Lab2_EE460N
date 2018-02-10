@@ -480,8 +480,8 @@ void process_instruction() {
 	if (highByte >> 4 == 0)
 	{
             NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.PC + 2);
-            if((CURRENT_LATCHES.N == highByte >> 3 & 0x1) ||(CURRENT_LATCHES.N == highByte >> 2 & 0x1) || (CURRENT_LATCHES.N == highByte >> 1 & 0x1) ){
-                operand1 = ((highByte & 0x1)<< 9) + (lowByte & 0xFF);
+            if((CURRENT_LATCHES.N & ((highByte >> 3) & 0x1)) ||(CURRENT_LATCHES.Z & ((highByte >> 2) & 0x1)) || (CURRENT_LATCHES.P & ((highByte >> 1) & 0x1)) ){
+                operand1 = ((highByte & 0x1)<< 8) + (lowByte & 0xFF);
                 if(operand1 & 0x100) operand1 = signExtend(operand1, 9);
                 operand1 = operand1 << 1;
                 NEXT_LATCHES.PC = Low16bits(NEXT_LATCHES.PC + operand1);
