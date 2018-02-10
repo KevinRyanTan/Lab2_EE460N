@@ -610,7 +610,7 @@ void process_instruction() {
 	{
             /*r7 loaded with incremented pc*/	
             NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC + 2;
-		NEXT_LATCHES.PC = Low16bits(lowByte) << 1;
+		NEXT_LATCHES.PC = MEMORY[lowByte][0];
 	}
 	/*XOR*/
 	if (highByte >> 4 == 9)
