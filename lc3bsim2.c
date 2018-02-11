@@ -572,7 +572,7 @@ void process_instruction() {
 			if (operand2 & 0x8000) operand2 = signExtend(operand2, 16);
 			CC_SETTER = operand2 >> operand1;
 			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
-		}
+                }
 		setCCs(CC_SETTER);
 		NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 	}
