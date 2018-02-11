@@ -454,7 +454,7 @@ void process_instruction() {
 	if (highByte >> 4 == 5)
 	{  
                 DR = (highByte >> 1) & 0x7;
-		SR1 = (highByte & 0x1 << 2) + ((lowByte >> 6) & 0x3);
+		SR1 = ((highByte & 0x1) << 2) + ((lowByte >> 6) & 0x3);
                 
                 operand1 = CURRENT_LATCHES.REGS[SR1];
                 if(operand1 & 0x8000) operand1 = signExtend(operand1, 16);
