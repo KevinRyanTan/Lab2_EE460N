@@ -4,9 +4,7 @@
         AND R1, R1, x8          ;R1<-8
         ADD R1,R1, #-16         ;R1<-(-8)
         AND R2, R2, #0          ;
-        ADD R2, R1, #0          ;
-        NOT R2, R2              ;
-        ADD R2, R2, #1          ;
+        ADD R2, R1, #0         
         RSHFL R2, R2, #1        ;
 START	ADD R1, R1, R1          ;
         ADD R2, R2, #-1         ;

@@ -557,26 +557,27 @@ void process_instruction() {
 	/*SHF*/
 	if (highByte >> 4 == 13)
 	{
-                int flag = (lowByte >> 4) & 0x3;
-                DR = (highByte >> 1) & 0x7;
-                SR1 = ((highByte & 0x1) << 2) + ((lowByte >> 6) & 0x3);
-		operand1 = lowByte & 0xF;/*amount*/
+        DR = (highByte >> 1) & 0x7;
+		SR1 = ((highByte & 0x1) << 2) + ((lowByte >> 6) & 0x3);
+		int flag = (lowByte >> 4) & 0x3;
+		operand1 = lowByte & 0x0F;
 		operand2 = CURRENT_LATCHES.REGS[SR1];
-                if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
+		
 		if (flag == 0) {
-                        CC_SETTER = operand2 << operand1;
+			CC_SETTER = operand2 << operand1;
 			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
 		}
 		/*logical*/
 		else if (flag == 1) {
-                        CC_SETTER = ((unsigned)operand2) >> operand1
+			CC_SETTER = ((unsigned)operand2) >> operand1;
 			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
 		}
 		/*arithmetic*/
 		else {
+			if (operand2 & 0x8000) operand2 = signExtend(operand2, 16);
 			CC_SETTER = operand2 >> operand1;
 			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
-                }
+		}
 		setCCs(CC_SETTER);
 		NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 	}
