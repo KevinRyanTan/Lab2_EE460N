@@ -440,7 +440,7 @@ void process_instruction() {
 		}
 		/*2 SR*/
                 else {
-                        SR2 = lowByte & 0x07;
+                        SR2 = lowByte & 0x7;
                         operand2 = CURRENT_LATCHES.REGS[SR2];
                         if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
     
@@ -657,5 +657,5 @@ int signExtend(int extend,int bit)
 {
     int mask = 0xFFFF0000;
     mask = mask >> (16-bit);	
-    return extend+mask;
+    return extend + mask;
 }
