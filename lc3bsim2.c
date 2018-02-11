@@ -557,19 +557,23 @@ void process_instruction() {
 	/*SHF*/
 	if (highByte >> 4 == 13)
 	{
-            int flag = (lowByte >> 4) & 0x11;
-		operand1 = lowByte & 0x0F;
+                int flag = (lowByte >> 4) & 0x3;
+                DR = (highByte >> 1) & 0x7;
+                SR1 = ((highByte & 0x1) << 2) + ((lowByte >> 6) & 0x3);
+		operand1 = lowByte & 0xF;/*amount*/
 		operand2 = CURRENT_LATCHES.REGS[SR1];
+                if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
 		if (flag == 0) {
-			NEXT_LATCHES.REGS[DR] = CC_SETTER = operand2 << operand1;
+                        CC_SETTER = operand2 << operand1;
+			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
 		}
 		/*logical*/
 		else if (flag == 1) {
-			NEXT_LATCHES.REGS[DR] = CC_SETTER = ((unsigned)operand2) >> operand1;
+                        CC_SETTER = ((unsigned)operand2) >> operand1
+			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
 		}
 		/*arithmetic*/
 		else {
-			if (operand2 & 0x8000) operand2 = signExtend(operand2, 16);
 			CC_SETTER = operand2 >> operand1;
 			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
                 }
@@ -610,40 +614,30 @@ void process_instruction() {
 	{
             /*r7 loaded with incremented pc*/	
             NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC + 2;
-		NEXT_LATCHES.PC = MEMORY[lowByte][0];
+            NEXT_LATCHES.PC = MEMORY[lowByte][0];
 	}
 	/*XOR*/
 	if (highByte >> 4 == 9)
 	{
 		DR = (highByte >> 1) & 0x7;
 		SR1 = ((highByte & 0x1 ) << 2) + ((lowByte >> 6) & 0x3);
-		/*imm5*/
-		operand1 = lowByte & 0x1F;
-		if (operand1 & 0x10) operand1 = signExtend(operand1, 5);
-		/*SR*/
-		operand2 = CURRENT_LATCHES.REGS[SR1];
-		if (operand2 & 0x8000) operand2 = signExtend(operand2, 16);
-
-		/*imm5*/
-		if ((lowByte & 0x20 )== 1) {
-			/*NOT*/
-			if (operand1 == 0x1F) {
-				NEXT_LATCHES.REGS[DR] = Low16bits(!(operand2));
-			}
-			else {
-				CC_SETTER = operand2 ^ (operand1);
-				NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
-			}
-		}
-		/*2 SR*/
-		else {
-			SR2 = CURRENT_LATCHES.REGS[lowByte & 0x7];
-			if (SR2 & 0x8000) SR2 = signExtend(SR2, 16);
-			CC_SETTER = operand2 ^ SR2;
-			NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
-		}
-		setCCs(CC_SETTER);
-		NEXT_LATCHES.PC = NEXT_LATCHES.PC + 2;
+		
+                operand1 = CURRENT_LATCHES.REGS[SR1];
+                if(operand1 & 0x8000) operand1 = signExtend(operand1, 16);
+                
+                if(lowByte & 0x60){
+                    operand2 = lowByte & 0x1F;
+                    if(operand2 & 0x10) operand2 = signExtend(operand2, 5);
+                }
+                else{
+                    SR2 = lowByte & 0x7;
+                    operand2 = CURRENT_LATCHES.REGS[SR2];
+                    if(operand2 & 0x8000) operand2 = signExtend(operand2, 16);
+                }
+                CC_SETTER = operand1 ^ operand2;
+                NEXT_LATCHES.REGS[DR] = Low16bits(CC_SETTER);
+                setCCs(CC_SETTER);
+                NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
 	}
 }
 
